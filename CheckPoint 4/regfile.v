@@ -13,7 +13,7 @@ module regfile(
 	always @(posedge clock or posedge ctrl_reset)
 	begin
 		if(ctrl_reset)
-			begin
+			begin:Gen_loop
 				integer i;
 				for(i = 0; i < 32; i = i + 1)
 					begin
