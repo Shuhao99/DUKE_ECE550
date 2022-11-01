@@ -97,14 +97,14 @@ module processor(
 	 wire [4:0] ALUSel;
 	 wire [11:0] InsPlus4;
 	 
-	 //clock generate !!!!
+	 //clock generate 
 	 wire imem_clock,reg_clock,dmem_clock;
 	 
 	 //pc + 4 !!!
 	 pc4 plus(address_imem,InsPlus4);
 	 
 	 //control logic 
-	 ConLogic cl1(q_imem,ImmSel,RegWEn,BSel,ALUSel,MemRW,WBSel);
+	 ConLogic cl1(q_imem,ImmSel,ctrl_writeEnable,BSel,ALUSel,MemRW,WBSel);
 	 
 	 //Imem
 	 imem my_imem(address_imem,imem_clock,q_imem);
