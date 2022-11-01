@@ -89,17 +89,22 @@ module processor(
     output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     output [31:0] data_writeReg;
     input [31:0] data_readRegA, data_readRegB;
-
+	 
     /* YOUR CODE STARTS HERE */
 	 //wire declare
-	 wire isNotEqual, isLessThan, overflow,Immsel,Bsel;
-	 wire [31:0] aftExt,aftBmux;
+	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,MemRW,WBSel;
+	 wire [31:0] aftExt,aftBmux,aftDmem,ALUout;
+	 wire [4:0] ALUSel;
+	 wire [11:0] InsPlus4;
 	 
 	 //clock generate
 	 wire imem_clock,reg_clock,dmem_clock;
 	 
+	 //pc + 4
+	 pc4 plus(address_imem,InsPlus4);
+	 
 	 //control logic !!!!
-	 ConLogic cl1(q_dmem,Immsel,Bsel,)
+	 ConLogic cl1(q_imem,ImmSel,RegWEn,BSel,ALUSel,MemRW,WBSel);
 	 
 	 //Imem
 	 imem my_imem(address_imem,imem_clock,q_imem);
@@ -108,16 +113,19 @@ module processor(
 	 regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
-	 alu a1(data_readRegA,aftBmux,q_imem[6:2],q_imem[11:7],data_writeReg,isNotEqual, isLessThan, overflow);
+	 alu a1(data_readRegA,aftBmux,q_imem[6:2],q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
 	 
-	 //sign extension(sx) !!!!
+	 //sign extension(sx) 
 	 sx sx1(q_imem[16:0],Immsel,aftExt);
 	 
 	 //mux for Bsel
 	 assign aftBmux = Bsel ? aftExt : data_readRegB;
 	 
 	 //dmem
-	 dmem dm1(data_writeReg[11:0],);
+	 dmem dm1(ALUout[11:0],dmem_clock,data_readRegB,MemRW,aftDmem);
+	 
+	 //mux for WBsel
+	 assign data_writeReg = WBSel ? ALUout : aftDmem;
 	 
 	 
 endmodule
