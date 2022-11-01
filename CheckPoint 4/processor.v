@@ -98,7 +98,10 @@ module processor(
 	 wire [11:0] InsPlus4;
 	 
 	 //clock generate 
-	 wire imem_clock,reg_clock,dmem_clock;
+	 wire imem_clock,reg_clock,dmem_clock,Unuse1,Unuse2,Unuse3;
+	 clk2(clock,reset,imem_clock,Unuse1);
+	 clk4(clock,reset,reg_clock,Unuse2);
+	 clk8(clock,reset,dmem_clock,Unuse3);
 	 
 	 //pc + 4 !!!
 	 pc4 plus(address_imem,InsPlus4);
