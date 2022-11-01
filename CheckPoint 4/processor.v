@@ -96,7 +96,7 @@ module processor(
 	 wire [31:0] aftExt,aftBmux;
 	 
 	 //clock generate
-	 wire imem_clock,reg_clock
+	 wire imem_clock,reg_clock,dmem_clock;
 	 
 	 //control logic !!!!
 	 ConLogic cl1(q_dmem,Immsel,Bsel,)
@@ -116,6 +116,8 @@ module processor(
 	 //mux for Bsel
 	 assign aftBmux = Bsel ? aftExt : data_readRegB;
 	 
+	 //dmem
+	 dmem dm1(data_writeReg[11:0],)
 	 
 	 
 endmodule
