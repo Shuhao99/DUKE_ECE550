@@ -83,7 +83,7 @@ module processor(
     output [31:0] data;
     output wren;
     input [31:0] q_dmem;
-
+	 
     // Regfile
     output ctrl_writeEnable;
     output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
@@ -97,13 +97,13 @@ module processor(
 	 wire [4:0] ALUSel;
 	 wire [11:0] InsPlus4;
 	 
-	 //clock generate
+	 //clock generate !!!!
 	 wire imem_clock,reg_clock,dmem_clock;
 	 
-	 //pc + 4
+	 //pc + 4 !!!
 	 pc4 plus(address_imem,InsPlus4);
 	 
-	 //control logic !!!!
+	 //control logic 
 	 ConLogic cl1(q_imem,ImmSel,RegWEn,BSel,ALUSel,MemRW,WBSel);
 	 
 	 //Imem
