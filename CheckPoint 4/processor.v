@@ -117,7 +117,7 @@ module processor(
 	 assign aftBmux = Bsel ? aftExt : data_readRegB;
 	 
 	 //dmem
-	 dmem dm1(data_writeReg[11:0],)
+	 dmem dm1(data_writeReg[11:0],);
 	 
 	 
 endmodule
