@@ -102,6 +102,7 @@ module processor(
 	 //pc + 4 output address_imem
 	 // address_imem,                   // O: The address of the data to get from imem
 	 pc4 plus(address_imem,InsPlus1);
+	 //module reg_32(q, d, clk, en, clr);
 	 reg_32 PC(address_imem, InsPlus1, clock, 1'b1, reset);
 	 
 	 //control logic 
