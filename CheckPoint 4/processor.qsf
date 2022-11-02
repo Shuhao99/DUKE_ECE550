@@ -57,7 +57,6 @@ set_global_assignment -name VERILOG_FILE regfile.v
 set_global_assignment -name VERILOG_FILE alu.v
 set_global_assignment -name VERILOG_FILE dmem.v
 set_global_assignment -name QIP_FILE dmem.qip
-set_global_assignment -name VERILOG_FILE imem.v
 set_global_assignment -name QIP_FILE imem.qip
 set_global_assignment -name VERILOG_FILE ConLogic.v
 set_global_assignment -name VERILOG_FILE dffe.v
