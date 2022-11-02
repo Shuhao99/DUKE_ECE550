@@ -9,7 +9,22 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,
+//Debug
+//// Imem
+//address_imem,                   // O: The address of the data to get from imem 
+//// Dmem
+//address_dmem,                   // O: The address of the data to get or put from/to dmem 
+//data,                           // O: The data to write to dmem 
+//wren,                           // O: Write enable for dmem
+//// Regfile
+//ctrl_writeEnable,               // O: Write enable for regfile
+//ctrl_writeReg,                  // O: Register to write to in regfile
+//ctrl_readRegA,                  // O: Register to read from port A of regfile
+//ctrl_readRegB,                  // O: Register to read from port B of regfile
+//data_writeReg,                  // O: Data to write to for regfile
+test_data, clk_reg_pc 
+);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -19,6 +34,11 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
+	 
+	 //Debug Out
+	 output [31:0] test_data;
+	 output clk_reg_pc;
+	
 	 
 	 //clock generate
 	 wire clock_25,clock_25_,clock_125,clock_125_;
@@ -74,7 +94,9 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB
+        data_readRegB,
+		  //Debug
+		  test_data
     );
 
     /** PROCESSOR **/
@@ -102,5 +124,6 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         data_readRegA,                  // I: Data from port A of regfile
         data_readRegB                   // I: Data from port B of regfile
     );
-
+	//Debug assign
+	 assign clk_reg_pc = clock_125_;
 endmodule
