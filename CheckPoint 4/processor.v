@@ -53,13 +53,15 @@ module processor(
     reset,                          // I: A reset signal
 
     // Imem
-    address_imem,                   // O: The address of the data to get from imem
-    q_imem,                         // I: The data from imem
+    address_imem,                   // O: The address of the data to get from imem ////
+    
+	 q_imem,                         // I: The data from imem
 
     // Dmem
-    address_dmem,                   // O: The address of the data to get or put from/to dmem
-    data,                           // O: The data to write to dmem
+    address_dmem,                   // O: The address of the data to get or put from/to dmem ////
+    data,                           // O: The data to write to dmem ////
     wren,                           // O: Write enable for dmem
+	 
     q_dmem,                         // I: The data from dmem
 
     // Regfile
@@ -92,28 +94,41 @@ module processor(
 	 
     /* YOUR CODE STARTS HERE */
 	 //wire declare
-	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,MemRW,WBSel;
-	 wire [31:0] aftExt,aftBmux,aftDmem,ALUout;
+	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,WBSel; //MemRW = wren
+	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_;
 	 wire [4:0] ALUSel;
-	 wire [11:0] InsPlus4;
+	 wire [11:0] InsPlus1;
 	 
-	 //clock generate 
-	 wire imem_clock,reg_clock,dmem_clock,Unuse1,Unuse2,Unuse3;
-	 clk2(clock,reset,imem_clock,Unuse1);
-	 clk4(clock,reset,reg_clock,Unuse2);
-	 clk8(clock,reset,dmem_clock,Unuse3);
-	 
-	 //pc + 4 !!!
-	 pc4 plus(address_imem,InsPlus4);
+	 //pc + 4 output address_imem
+	 // address_imem,                   // O: The address of the data to get from imem
+	 pc4 plus(address_imem,InsPlus1);
+	 reg_32 PC(address_imem, InsPlus1, clock, 1'b1, reset);
 	 
 	 //control logic 
-	 ConLogic cl1(q_imem,ImmSel,ctrl_writeEnable,BSel,ALUSel,MemRW,WBSel);
+	 //ctrl_writeEnable,               // O: Write enable for regfile
+	 //wren,                           // O: Write enable for dmem
+	 ConLogic cl1(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel);
 	 
 	 //Imem
-	 imem my_imem(address_imem,imem_clock,q_imem);
+	 // imem my_imem(address_imem,imem_clock,q_imem);
 	 
-	 //Regfile
-	 regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
+		
+	 //dmem
+	 //address_dmem,                   // O: The address of the data to get or put from/to dmem ////
+    //data,                           // O: The data to write to dmem ////
+	 assign data = data_readRegB;
+	 assign address_dmem = ALUout[11:0];
+	 //dmem dm1(ALUout[11:0],dmem_clock,data_readRegB,MemRW,aftDmem);
+	 
+	 
+	 // Regfile
+	 //    ctrl_writeReg,                  // O: Register to write to in regfile
+	 //    ctrl_readRegA,                  // O: Register to read from port A of regfile
+	 //    ctrl_readRegB,                  // O: Register to read from port B of regfile
+	 assign ctrl_writeReg = overflow ? 5'd30 : q_imem[26:22];
+	 assign ctrl_readRegA = q_imem[21:17];
+	 assign ctrl_readRegB = q_imem[16:12];
+	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
 	 alu a1(data_readRegA,aftBmux,q_imem[6:2],q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
@@ -123,12 +138,12 @@ module processor(
 	 
 	 //mux for Bsel
 	 assign aftBmux = Bsel ? aftExt : data_readRegB;
-	 
-	 //dmem
-	 dmem dm1(ALUout[11:0],dmem_clock,data_readRegB,MemRW,aftDmem);
+	
 	 
 	 //mux for WBsel
-	 assign data_writeReg = WBSel ? ALUout : aftDmem;
+	 //    data_writeReg,                  // O: Data to write to for regfile 
+	 assign ALUout_ = overflow ? 32'b11111111111111111111111111111111 : ALUout;
+	 assign data_writeReg = WBSel ? ALUout_ : q_dmem;
 	 
 	 
 endmodule

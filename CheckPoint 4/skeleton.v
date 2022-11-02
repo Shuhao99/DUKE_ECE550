@@ -19,12 +19,25 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
         based on proper functioning with this clock.
     */
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
+	 
+	 //clock generate
+	 wire clock_25,clock_25_,clock_125,clock_125_,clock_625,clock_625_;
+	 clk2 clk_25(clock,reset,clock_25,clock_25_);
+	 clk2 clk_125(clock_25,reset,clock_125,clock_125_);
+	 clk2 clk_625(clock_125,reset,clock_625,clock_625_);
+	 
+	 assign imem_clock = clock_25;
+	 assign dmem_clock = clock_25_;
+	 assign regfile_clock = clock_125;
+	 assign processor_clock = clock_625;
 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
     // Make sure you configure it correctly!
     wire [11:0] address_imem;
     wire [31:0] q_imem;
+	 
+	 // imem my_imem(address_imem,imem_clock,q_imem);
     imem my_imem(
         .address    (address_imem),            // address of data
         .clock      (imem_clock),                  // you may need to invert the clock
@@ -39,15 +52,16 @@ module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_c
     wire wren;
     wire [31:0] q_dmem;
     dmem my_dmem(
-        .address    (/* 12-bit wire */),       // address of data
+        .address    (address_dmem),       // address of data
         .clock      (dmem_clock),                  // may need to invert the clock
-        .data	    (/* 32-bit data in */),    // data you want to write
-        .wren	    (/* 1-bit signal */),      // write enable
-        .q          (/* 32-bit data out */)    // data from dmem
+        .data	    (data),    // data you want to write
+        .wren	    (wren),      // write enable
+        .q          (q_dmem)    // data from dmem
     );
 
     /** REGFILE **/
     // Instantiate your regfile
+	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
     wire ctrl_writeEnable;
     wire [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
     wire [31:0] data_writeReg;

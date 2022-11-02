@@ -50,7 +50,7 @@ module RCA_12bit (A, B, c_in, c_out, sum, last_in);
 	FA FA11(.a(A[10]), .b(B[10]), .c_in(connection[9]), 
 			 .sum(sum[10]), .c_out(connection[10])
 			);
-	and (last_in, connection[10],1);
+	and (last_in, connection[10],1'b1);
 	FA FA12(.a(A[11]), .b(B[11]), .c_in(connection[10]), 
 			 .sum(sum[11]), .c_out(c_out)
 			);
