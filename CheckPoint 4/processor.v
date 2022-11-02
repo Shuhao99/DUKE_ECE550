@@ -95,7 +95,7 @@ module processor(
     /* YOUR CODE STARTS HERE */
 	 //wire declare
 	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,WBSel; //MemRW = wren
-	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_;
+	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_, overflow_j, overflow_rpt;
 	 wire [4:0] ALUSel;
 	 wire [11:0] InsPlus1;
 	 
@@ -142,7 +142,9 @@ module processor(
 	 
 	 //mux for WBsel
 	 //    data_writeReg,                  // O: Data to write to for regfile 
-	 assign ALUout_ = overflow ? 32'b11111111111111111111111111111111 : ALUout;
+	 assign overflow_rpt = q_imem[29]?32'd2:overflow_j;
+	 assign overflow_j = q_imem[2]?32'd3:32'd1;
+	 assign ALUout_ = overflow ? overflow_rpt : ALUout;
 	 assign data_writeReg = WBSel ? ALUout_ : q_dmem;
 	 
 	 
