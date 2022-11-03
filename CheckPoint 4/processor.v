@@ -71,9 +71,20 @@ module processor(
     ctrl_readRegB,                  // O: Register to read from port B of regfile
     data_writeReg,                  // O: Data to write to for regfile
     data_readRegA,                  // I: Data from port A of regfile
-    data_readRegB                   // I: Data from port B of regfile
+    data_readRegB,                   // I: Data from port B of regfile
+	 
+	 //debug
+	 overflow,
+	 ALUout,
+	 ALUout_,
+	 aftBmux,
+	 aftExt
 );
-    // Control signals
+    //debug
+	 output overflow;
+	 output [31:0] ALUout, ALUout_,aftBmux,aftExt;
+	 
+	 // Control signals
     input clock, reset;
 		
     // Imem

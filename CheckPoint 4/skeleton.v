@@ -11,19 +11,20 @@
 
 module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,
 //Debug
-//// Imem
-//address_imem,                   // O: The address of the data to get from imem 
-//// Dmem
-//address_dmem,                   // O: The address of the data to get or put from/to dmem 
-//data,                           // O: The data to write to dmem 
-//wren,                           // O: Write enable for dmem
-//// Regfile
-//ctrl_writeEnable,               // O: Write enable for regfile
-//ctrl_writeReg,                  // O: Register to write to in regfile
-//ctrl_readRegA,                  // O: Register to read from port A of regfile
-//ctrl_readRegB,                  // O: Register to read from port B of regfile
-//data_writeReg,                  // O: Data to write to for regfile
-test_data, clk_reg_pc 
+// Imem
+address_imem,                   // O: The address of the data to get from imem 
+// Dmem
+address_dmem,                   // O: The address of the data to get or put from/to dmem 
+data,                           // O: The data to write to dmem 
+wren,                           // O: Write enable for dmem
+// Regfile
+ctrl_writeEnable,               // O: Write enable for regfile
+ctrl_writeReg,                  // O: Register to write to in regfile
+ctrl_readRegA,                  // O: Register to read from port A of regfile
+ctrl_readRegB,                  // O: Register to read from port B of regfile
+data_writeReg,                  // O: Data to write to for regfile
+clk_reg_pc, q_imem,data_readRegA,data_readRegB,
+overflow,ALUout,ALUout_,aftBmux,aftExt
 );
     input clock, reset;
     /* 
@@ -36,8 +37,24 @@ test_data, clk_reg_pc
     output imem_clock, dmem_clock, processor_clock, regfile_clock;
 	 
 	 //Debug Out
-	 output [31:0] test_data;
+	 output overflow;
+	 output [31:0] ALUout, ALUout_,aftBmux,aftExt;
+	 //output [31:0] test_data;
 	 output clk_reg_pc;
+	 // Imem
+    output [11:0] address_imem;
+
+    // Dmem
+    output [11:0] address_dmem;
+    output [31:0] data;
+    output wren;
+	 
+    // Regfile
+    output ctrl_writeEnable;
+    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+    output [31:0] data_writeReg;
+	 output [31:0] q_imem;
+	 output [31:0] data_readRegA,data_readRegB;
 	
 	 
 	 //clock generate
@@ -48,7 +65,7 @@ test_data, clk_reg_pc
 	 assign imem_clock = clock;
 	 assign dmem_clock = clock;
 	 assign regfile_clock = clock_125_;
-	 assign processor_clock = clock_25_;
+	 assign processor_clock = clock_125_;
 
     /** IMEM **/
     // Figure out how to generate a Quartus syncram component and commit the generated verilog file.
@@ -96,7 +113,7 @@ test_data, clk_reg_pc
         data_readRegA,
         data_readRegB,
 		  //Debug
-		  test_data
+		  //test_data
     );
 
     /** PROCESSOR **/
@@ -122,7 +139,13 @@ test_data, clk_reg_pc
         ctrl_readRegB,                  // O: Register to read from port B of regfile
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
-        data_readRegB                   // I: Data from port B of regfile
+        data_readRegB,                   // I: Data from port B of regfile
+		  //debug
+			overflow,
+			ALUout,
+			ALUout_,
+			aftBmux,
+			aftExt
     );
 	//Debug assign
 	 assign clk_reg_pc = clock_125_;

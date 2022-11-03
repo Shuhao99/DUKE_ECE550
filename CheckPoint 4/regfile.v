@@ -1,34 +1,59 @@
-module regfile(
-	clock, ctrl_writeEnable, ctrl_reset, ctrl_writeReg,
-	ctrl_readRegA, ctrl_readRegB, data_writeReg, data_readRegA,
-	data_readRegB, debug
+module regfile (
+    clock,
+    ctrl_writeEnable,
+    ctrl_reset, ctrl_writeReg,
+    ctrl_readRegA, ctrl_readRegB, data_writeReg,
+    data_readRegA, data_readRegB
 );
-	input clock, ctrl_writeEnable, ctrl_reset;
-	input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-	input [31:0] data_writeReg;
-	output [31:0] data_readRegA, data_readRegB;
-	output [31:0] debug;
 
-	reg[31:0] registers[31:0];
-	
-	always @(posedge clock or posedge ctrl_reset)
-	begin
-		if(ctrl_reset)
-			begin:Gen_loop
-				integer i;
-				for(i = 0; i < 32; i = i + 1)
-					begin
-						registers[i] = 32'd0;
-					end
-			end
-		else
-			if(ctrl_writeEnable && ctrl_writeReg != 5'd0)
-				registers[ctrl_writeReg] = data_writeReg;
-	end
-	
-	assign data_readRegA = ctrl_writeEnable && (ctrl_writeReg == ctrl_readRegA) ? 32'bz : registers[ctrl_readRegA];
-	assign data_readRegB = ctrl_writeEnable && (ctrl_writeReg == ctrl_readRegB) ? 32'bz : registers[ctrl_readRegB];
-	//debug
-	assign debug = registers[5'd20];
+   input clock, ctrl_writeEnable, ctrl_reset;
+   input [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
+   input [31:0] data_writeReg;
 
+   output [31:0] data_readRegA, data_readRegB;
+	
+	wire [31:0] read_eA,read_eB, write_e;
+	wire [31:0] reg_d[0:31];
+	wire [31:0] a_out;
+
+//	output [31:0] read_eA,read_eB, write_e;
+//	output [31:0] a_out;
+	
+	//decoder(sel, out);
+	decoder readA(ctrl_readRegA, read_eA);
+	decoder readB(ctrl_readRegB, read_eB);
+	decoder write(ctrl_writeReg, write_e);
+	//and a_0(write_e[0],0,0);
+
+   //write reg
+	//module reg_32(q, d, clk, en, clr);
+	reg_32 reg_32_0(reg_d[0],data_writeReg,clock,0,ctrl_reset);
+	
+	genvar i;
+	generate 
+		for(i=1;i<32;i=i+1) begin: generate_block1
+			//(q, d, clk, en, clr)
+			
+			and a_1(a_out[i], write_e[i], ctrl_writeEnable);
+			reg_32 reg_32_(reg_d[i],data_writeReg,clock,a_out[i],ctrl_reset);
+		end
+	endgenerate
+	
+	genvar j;
+	generate 
+		for(j=0;j<32;j=j+1) begin: generate_block2
+			assign data_readRegA = read_eA[j] ? reg_d[j] : 32'bz;
+		end
+	endgenerate
+	
+	
+	genvar k;
+	generate 
+		for(k=0;k<32;k=k+1) begin: generate_block3
+			assign data_readRegB = read_eB[k] ? reg_d[k] : 32'bz;
+		end
+	endgenerate
+	
+	
+	
 endmodule
