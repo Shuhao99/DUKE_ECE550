@@ -3,7 +3,9 @@ module regfile (
     ctrl_writeEnable,
     ctrl_reset, ctrl_writeReg,
     ctrl_readRegA, ctrl_readRegB, data_writeReg,
-    data_readRegA, data_readRegB
+    data_readRegA, data_readRegB,
+	 //debug
+	 test_data
 );
 
    input clock, ctrl_writeEnable, ctrl_reset;
@@ -15,6 +17,17 @@ module regfile (
 	wire [31:0] read_eA,read_eB, write_e;
 	wire [31:0] reg_d[0:31];
 	wire [31:0] a_out;
+	
+	//debug
+	output [31:0] test_data;
+	wire [31:0] read_20;
+	decoder readtest(5'd20, read_20);
+	genvar p;
+	generate 
+		for(p=0;p<32;p=p+1) begin: generate_block4
+			assign test_data = read_20[p] ? reg_d[p] : 32'bz;
+		end
+	endgenerate
 
 //	output [31:0] read_eA,read_eB, write_e;
 //	output [31:0] a_out;

@@ -143,7 +143,7 @@ module processor(
 	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
-	 alu a1(data_readRegA,aftBmux,q_imem[6:2],q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
+	 alu a1(data_readRegA,aftBmux,ALUSel,q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
 	 
 	 //sign extension(sx) 
 	 sx sx1(q_imem[16:0],Immsel,aftExt);
@@ -157,7 +157,7 @@ module processor(
 	 assign overflow_rpt = q_imem[29]?32'd2:overflow_j;
 	 assign overflow_j = q_imem[2]?32'd3:32'd1;
 	 assign ALUout_ = overflow ? overflow_rpt : ALUout;
-	 assign data_writeReg = WBSel ? ALUout_ : q_dmem;
+	 assign data_writeReg = WBSel ? q_dmem : ALUout_;
 	 
 	 
 endmodule
