@@ -9,23 +9,7 @@
  * inspect which signals the processor tries to assert when.
  */
 
-module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock,
-//Debug
-// Imem
-address_imem,                   // O: The address of the data to get from imem 
-// Dmem
-address_dmem,                   // O: The address of the data to get or put from/to dmem 
-data,                           // O: The data to write to dmem 
-wren,                           // O: Write enable for dmem
-// Regfile
-ctrl_writeEnable,               // O: Write enable for regfile
-ctrl_writeReg,                  // O: Register to write to in regfile
-ctrl_readRegA,                  // O: Register to read from port A of regfile
-ctrl_readRegB,                  // O: Register to read from port B of regfile
-data_writeReg,                  // O: Data to write to for regfile
-clk_reg_pc, q_imem,data_readRegA,data_readRegB,
-overflow,ALUout,ALUout_,aftBmux,aftExt
-);
+module skeleton(clock, reset, imem_clock, dmem_clock, processor_clock, regfile_clock);
     input clock, reset;
     /* 
         Create four clocks for each module from the original input "clock".
@@ -34,28 +18,7 @@ overflow,ALUout,ALUout_,aftBmux,aftExt
         (these may be inverted, divided, or unchanged from the original clock input). Your grade will be 
         based on proper functioning with this clock.
     */
-    output imem_clock, dmem_clock, processor_clock, regfile_clock;
-	 
-	 //Debug Out
-	 output overflow;
-	 output [31:0] ALUout, ALUout_,aftBmux,aftExt;
-	 //output [31:0] test_data;
-	 output clk_reg_pc;
-	 // Imem
-    output [11:0] address_imem;
-
-    // Dmem
-    output [11:0] address_dmem;
-    output [31:0] data;
-    output wren;
-	 
-    // Regfile
-    output ctrl_writeEnable;
-    output [4:0] ctrl_writeReg, ctrl_readRegA, ctrl_readRegB;
-    output [31:0] data_writeReg;
-	 output [31:0] q_imem;
-	 output [31:0] data_readRegA,data_readRegB;
-	
+    output imem_clock, dmem_clock, processor_clock, regfile_clock;	
 	 
 	 //clock generate
 	 wire clock_25,clock_25_,clock_125,clock_125_;
@@ -111,9 +74,7 @@ overflow,ALUout,ALUout_,aftBmux,aftExt
         ctrl_readRegB,
         data_writeReg,
         data_readRegA,
-        data_readRegB,
-		  //Debug
-		  //test_data
+        data_readRegB
     );
 
     /** PROCESSOR **/
@@ -139,14 +100,6 @@ overflow,ALUout,ALUout_,aftBmux,aftExt
         ctrl_readRegB,                  // O: Register to read from port B of regfile
         data_writeReg,                  // O: Data to write to for regfile
         data_readRegA,                  // I: Data from port A of regfile
-        data_readRegB,                   // I: Data from port B of regfile
-		  //debug
-			overflow,
-			ALUout,
-			ALUout_,
-			aftBmux,
-			aftExt
+        data_readRegB                   // I: Data from port B of regfile
     );
-	//Debug assign
-	 assign clk_reg_pc = clock_125_;
 endmodule

@@ -3,7 +3,7 @@
  *
  * The processor takes in several inputs from a skeleton file.
  *
- * Inputs
+ * Input
  * clock: this is the clock for your processor at 50 MHz
  * reset: we should be able to assert a reset to start your pc from 0 (sync or
  * async is fine)
@@ -71,18 +71,8 @@ module processor(
     ctrl_readRegB,                  // O: Register to read from port B of regfile
     data_writeReg,                  // O: Data to write to for regfile
     data_readRegA,                  // I: Data from port A of regfile
-    data_readRegB,                   // I: Data from port B of regfile
-	 
-	 //debug
-	 overflow,
-	 ALUout,
-	 ALUout_,
-	 aftBmux,
-	 aftExt
+    data_readRegB                   // I: Data from port B of regfile
 );
-    //debug
-	 output overflow;
-	 output [31:0] ALUout, ALUout_,aftBmux,aftExt;
 	 
 	 // Control signals
     input clock, reset;
@@ -139,7 +129,7 @@ module processor(
 	 //    ctrl_readRegB,                  // O: Register to read from port B of regfile
 	 assign ctrl_writeReg = overflow ? 5'd30 : q_imem[26:22];
 	 assign ctrl_readRegA = q_imem[21:17];
-	 assign ctrl_readRegB = q_imem[16:12];
+	 assign ctrl_readRegB = wren ? q_imem[26:22]:q_imem[16:12];
 	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
