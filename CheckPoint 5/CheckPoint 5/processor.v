@@ -170,7 +170,7 @@ module processor(
 	 Convert32 my12to32(address_imem,address_imem_32bits);//!!!!!!!!!!
 	 
 	 //select between pc and DataA 
-	 assign aftAsel = Asel ? 	 : data_readRegA;
+	 assign aftAsel = Asel ? 	address_imem_32bits : data_readRegA;
 	 
 	 //alu转回12bits
 	 Convert12 my32to12(ALUout,ALUout12bit);//!!!!!!!!!!!!!
