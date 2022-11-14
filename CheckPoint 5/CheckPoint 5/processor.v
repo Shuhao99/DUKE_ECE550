@@ -95,21 +95,25 @@ module processor(
 	 
     /* YOUR CODE STARTS HERE */
 	 //wire declare
-	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,WBSel; //MemRW = wren
-	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_, overflow_j, overflow_rpt;
+	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,PCSel,BrNEq,BrLT,Asel; //MemRW = wren
+	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_, overflow_j, overflow_rpt,aftShift2,address_imem_32bits,aftAsel,InsPlus1_32b;
 	 wire [4:0] ALUSel;
-	 wire [11:0] InsPlus1;
-	 
+	 wire [11:0] InsPlus1,ALUout12bit,aftPCSel;
+	 wire [1:0] WBSel;
 	 //pc + 4 output address_imem
 	 // address_imem,                   // O: The address of the data to get from imem
 	 pc4 plus(address_imem,InsPlus1);
 	 //module reg_32(q, d, clk, en, clr);
-	 reg_32 PC(address_imem, InsPlus1, clock, 1'b1, reset);
+	 reg_32 PC(address_imem, aftPCSel, clock, 1'b1, reset);
 	 
 	 //control logic 
 	 //ctrl_writeEnable,               // O: Write enable for regfile
 	 //wren,                           // O: Write enable for dmem
-	 ConLogic cl1(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel);
+	 
+	 //old control logic:
+	 //ConLogic cl1(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel);
+	 //new:
+	 ConLogic cl_CP5(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel,PCSel,BrNEq,BrLT,Asel);//WBSel 改加宽一位
 	 
 	 //Imem
 	 // imem my_imem(address_imem,imem_clock,q_imem);
@@ -133,7 +137,7 @@ module processor(
 	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
-	 alu a1(data_readRegA,aftBmux,ALUSel,q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
+	 alu a1(aftAsel,aftBmux,ALUSel,q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
 	 
 	 //sign extension(sx) 
 	 sx sx1(q_imem[16:0],Immsel,aftExt);
@@ -147,7 +151,31 @@ module processor(
 	 assign overflow_rpt = q_imem[29]?32'd2:overflow_j;
 	 assign overflow_j = q_imem[2]?32'd3:32'd1;
 	 assign ALUout_ = overflow ? overflow_rpt : ALUout;
-	 assign data_writeReg = WBSel ? q_dmem : ALUout_;
+	 assign data_writeReg = WBSel ? q_dmem : ALUout_;//改成4 to 1 mux(要三选一),记得删了
 	 
+	 //pc+4 转32bits
+	 Convert32 pcplus4To32(InsPlus1,InsPlus1_32b)//!!!!!!!!!!!!!
+	 
+	 //三选一：
+	 CP5WBsel my3to1(data_writeReg,WBSel,InsPlus1_32b,ALUout_,q_dmem);//!!!!!!!!!!!WBSel 改加宽一位
+	 
+	 //branch comparator P38,BrEQ改BrNEQ，其他沿用。并且只会是signed
+	 brcomp Mybrcomp(data_readRegA,data_readRegB,BrNEq,BrLT);//!!!!!!!!!
+	 
+	 //left shift 2 接在bsel后面，和Asel（是否branch）同一个判断
+	 //功能：Asel=1，shift 2位；Asel=0，output=input
+	 leftshift2 Mylefts(aftBmux,Asel,aftShift2);//!!!!!!!根据ed最新消息，不用写了
+	 
+	 //PC（12bit）转PC(32bits)
+	 Convert32 my12to32(address_imem,address_imem_32bits);//!!!!!!!!!!
+	 
+	 //select between pc and DataA 
+	 assign aftAsel = Asel ? 	 : data_readRegA;
+	 
+	 //alu转回12bits
+	 Convert12 my32to12(ALUout,ALUout12bit);//!!!!!!!!!!!!!
+	 
+	 //PCsel
+	 assign aftPCSel = PCSel ? ALUout12bit : InsPlus1;
 	 
 endmodule
