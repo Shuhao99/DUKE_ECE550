@@ -151,29 +151,29 @@ module processor(
 	 assign overflow_rpt = q_imem[29]?32'd2:overflow_j;
 	 assign overflow_j = q_imem[2]?32'd3:32'd1;
 	 assign ALUout_ = overflow ? overflow_rpt : ALUout;
-	 assign data_writeReg = WBSel ? q_dmem : ALUout_;//改成4 to 1 mux(要三选一),记得删了
+	 //assign data_writeReg = WBSel ? q_dmem : ALUout_;//改成4 to 1 mux(要三选一),记得删了！！！！！！！
 	 
 	 //pc+4 转32bits
-	 Convert32 pcplus4To32(InsPlus1,InsPlus1_32b)//!!!!!!!!!!!!!
+	 Convert32 pcplus4To32(InsPlus1,InsPlus1_32b);//
 	 
 	 //三选一：
-	 CP5WBsel my3to1(data_writeReg,WBSel,InsPlus1_32b,ALUout_,q_dmem);//!!!!!!!!!!!WBSel 改加宽一位
+	 CP5WBsel my3to1(data_writeReg,WBSel,q_dmem,ALUout_,InsPlus1_32b);
 	 
 	 //branch comparator P38,BrEQ改BrNEQ，其他沿用。并且只会是signed
-	 brcomp Mybrcomp(data_readRegA,data_readRegB,BrNEq,BrLT);//!!!!!!!!!
+	 brcomp Mybrcomp(data_readRegA,data_readRegB,BrNEq,BrLT);//
 	 
 	 //left shift 2 接在bsel后面，和Asel（是否branch）同一个判断
 	 //功能：Asel=1，shift 2位；Asel=0，output=input
-	 leftshift2 Mylefts(aftBmux,Asel,aftShift2);//!!!!!!!根据ed最新消息，不用写了
+//	 leftshift2 Mylefts(aftBmux,Asel,aftShift2);//根据ed最新消息，不用写了
 	 
 	 //PC（12bit）转PC(32bits)
-	 Convert32 my12to32(address_imem,address_imem_32bits);//!!!!!!!!!!
+	 Convert32 my12to32(address_imem,address_imem_32bits);
 	 
 	 //select between pc and DataA 
 	 assign aftAsel = Asel ? 	address_imem_32bits : data_readRegA;
 	 
 	 //alu转回12bits
-	 Convert12 my32to12(ALUout,ALUout12bit);//!!!!!!!!!!!!!
+	 Convert12 my32to12(ALUout,ALUout12bit);
 	 
 	 //PCsel
 	 assign aftPCSel = PCSel ? ALUout12bit : InsPlus1;
