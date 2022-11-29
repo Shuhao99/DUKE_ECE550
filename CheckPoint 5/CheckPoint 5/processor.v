@@ -95,9 +95,9 @@ module processor(
 	 
     /* YOUR CODE STARTS HERE */
 	 //wire declare
-	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,PCSel,BrNEq,BrLT,Asel; //MemRW = wren
+	 wire isNotEqual, isLessThan, overflow,Immsel,RegWEn,Bsel,PCSel,BrNEq,BrLT,Asel, setx, bex, jal,swt_d; //MemRW = wren
 	 wire [31:0] aftExt,aftBmux,ALUout, ALUout_, overflow_j, overflow_rpt,aftShift2,address_imem_32bits,aftAsel,InsPlus1_32b;
-	 wire [4:0] ALUSel;
+	 wire [4:0] ALUSel,aftoverflow_mux,aftjal_mux, beforectrl_readRegB;
 	 wire [11:0] InsPlus1,ALUout12bit,aftPCSel;
 	 wire [1:0] WBSel;
 	 //pc + 4 output address_imem
@@ -113,7 +113,7 @@ module processor(
 	 //old control logic:
 	 //ConLogic cl1(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel);
 	 //new:
-	 ConLogic cl_CP5(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel,PCSel,BrNEq,BrLT,Asel);//WBSel 改加宽一位
+	 ConLogic cl_CP5(q_imem,Immsel,ctrl_writeEnable,Bsel,ALUSel,wren,WBSel,PCSel,BrNEq,BrLT, Asel, setx, bex, jal,swt_d);//WBSel 改加宽一位
 	 
 	 //Imem
 	 // imem my_imem(address_imem,imem_clock,q_imem);
@@ -131,16 +131,18 @@ module processor(
 	 //    ctrl_writeReg,                  // O: Register to write to in regfile
 	 //    ctrl_readRegA,                  // O: Register to read from port A of regfile
 	 //    ctrl_readRegB,                  // O: Register to read from port B of regfile
-	 assign ctrl_writeReg = overflow ? 5'd30 : q_imem[26:22];
-	 assign ctrl_readRegA = q_imem[21:17];
-	 assign ctrl_readRegB = wren ? q_imem[26:22]:q_imem[16:12];
+	 assign aftoverflow_mux = overflow ? 5'd30 : q_imem[26:22];
+	 //134加mux：加在187行
+	 //assign ctrl_readRegA = q	_imem[21:17];
+	 //BNE,JR,BLT.SW
+	 assign beforectrl_readRegB = swt_d ? q_imem[26:22]:q_imem[16:12];
 	 //regfile regf(reg_clock,ctrl_writeEnable,reset,q_imem[26:22],q_imem[21:17],q_imem[16:12],data_writeReg,data_readRegA,data_readRegB);
 	
 	 //alu
 	 alu a1(aftAsel,aftBmux,ALUSel,q_imem[11:7],ALUout,isNotEqual, isLessThan, overflow);
 	 
 	 //sign extension(sx) 
-	 sx sx1(q_imem[16:0],Immsel,aftExt);
+	 sx sx1(q_imem[16:0],aftExt);
 	 
 	 //mux for Bsel
 	 assign aftBmux = Bsel ? aftExt : data_readRegB;
@@ -160,16 +162,16 @@ module processor(
 	 CP5WBsel my3to1(data_writeReg,WBSel,q_dmem,ALUout_,InsPlus1_32b);
 	 
 	 //branch comparator P38,BrEQ改BrNEQ，其他沿用。并且只会是signed
-	 brcomp Mybrcomp(data_readRegA,data_readRegB,BrNEq,BrLT);//
+	 brcomp Mybrcomp(data_readRegB,data_readRegA,BrNEq,BrLT);//
 	 
 	 //left shift 2 接在bsel后面，和Asel（是否branch）同一个判断
 	 //功能：Asel=1，shift 2位；Asel=0，output=input
 //	 leftshift2 Mylefts(aftBmux,Asel,aftShift2);//根据ed最新消息，不用写了
 	 
 	 //PC（12bit）转PC(32bits)
-	 Convert32 my12to32(address_imem,address_imem_32bits);
+	 Convert32 my12to32(InsPlus1,address_imem_32bits);
 	 
-	 //select between pc and DataA 
+	 //select between pc+1(32bits) and DataA 
 	 assign aftAsel = Asel ? 	address_imem_32bits : data_readRegA;
 	 
 	 //alu转回12bits
@@ -177,5 +179,17 @@ module processor(
 	 
 	 //PCsel
 	 assign aftPCSel = PCSel ? ALUout12bit : InsPlus1;
+	 
+//	 setx -> addi (Addr–D[26:22]=$rstatus)
+	 assign ctrl_writeReg=setx ? 5'd30 : aftjal_mux;
+//	 Bex -> bne (Addr–A(B)[26:22]=$rstatus)
+	 
+	 assign ctrl_readRegB= bex ? 5'd30 :beforectrl_readRegB;
+	 
+//	 Jal -> ctrl_WriteReg_destination=$31(134行加一个mux）
+	 assign aftjal_mux=jal ? 5'd31: aftoverflow_mux;
+	 
+	//use $r0:
+	 assign ctrl_readRegA =setx ? 5'd0 :  q_imem[21:17]; 
 	 
 endmodule
