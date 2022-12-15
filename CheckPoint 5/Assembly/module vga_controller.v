@@ -1626,7 +1626,10 @@ begin
 		Contt	<=	Contt+1;
 	end
 	else
+    begin
 	press_flag<=1'b0;
+    Contt<=20'd0;
+    end
 end
 // 处理键盘输入，control用来控制block位置
 // ctl 0向左，1向右，2转向
@@ -1738,6 +1741,7 @@ block p1(clk_4, state, current_block_data, /*32'b0000000000000000000001101110010
 outmat
 , , ,state1,outputblock,state2,pause,resetn);
 
+//outputblock instruction bus
  
 reg [23:0] bgr_data_final_1;
 reg [12:0] xx,yy;
@@ -1748,6 +1752,7 @@ wire [6:0] seg2;
 Hexadecimal_To_Seven_Segment h1(score/10,seg1);
 Hexadecimal_To_Seven_Segment h2(score%10,seg2);
 always@(posedge VGA_CLK_n)
+//渲染图形
 begin
 	xx <= ADDR/10'd640 - 1; 
 	yy <= ADDR%10'd640 - 1;
@@ -2058,11 +2063,6 @@ begin
 
 
 end
-	
-
-
-
-
 
 		end
 	end
@@ -2082,27 +2082,21 @@ begin
   oBLANK_n<=cBLANK_n;
 end
 
-
-
- 
  
 endmodule
  	
 	
-
- 	
-	
 //block module
 //region
-
+//block 状态机的写法 automata
 module block(clk, state, current_block_data, random_generate, control, 
 line,temp_block_data,next_block_data,state1,outputblock,state2,pause,reset
  );
 input clk;
-//input state;  //state = 0, rotate and fall down;   state = 1, random generate a current block
+//state = 0, rotate and fall down;   state = 1, random generate a current block
 input [1:0] control;   //control = 0, move left; control = 1, move right; control = 2; rotate;
+
 input [149:0] line;
-//input pause;
 output reg pause = 0;
 input [31:0] random_generate;
 output reg [31:0] current_block_data;
@@ -2174,7 +2168,7 @@ begin
 			outputblock<=current_block_data;
 		end
 	end
-	
+	//情况是左右旋转
 	else if(state == 1||state == 3||state == 5||state == 7)
 	begin
 			temp_block_data<=current_block_data;
@@ -2594,7 +2588,7 @@ begin
 end
 	
 	
-	
+//碰撞检测
 	else if(state == 9)
 	begin
 		if(current_block_data[10:8] == 0)
