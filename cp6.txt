@@ -1,0 +1,4 @@
+
+//VGA_Audio_PLL.v Recitation 模板
+
+//Reset_Delay: posedge +1 到时间reset，控制reset
