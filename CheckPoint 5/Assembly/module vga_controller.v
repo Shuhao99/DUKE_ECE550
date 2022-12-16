@@ -1624,6 +1624,7 @@ begin
 	if(Contt!=20'hFFFFF)
 	begin
 		Contt	<=	Contt+1;
+		 press_flag = 1'b1;
 	end
 	else
     begin
@@ -1641,20 +1642,20 @@ begin
     if(ps2_key_pressed==1&&ps2_out==8'h 74&&press_flag==1'b0)
 	begin
 		control<=1;
-        press_flag = 1'b1;
+//        press_flag = 1'b1;
 	end
     
     //上键
 	else if(ps2_key_pressed==1&&ps2_out == 8'h 75&&press_flag==1'b0)
 	begin
 		control<=2;
-        press_flag = 1'b1;
+//        press_flag = 1'b1;
 	end
     //左键 
 	else if(ps2_key_pressed==1&&ps2_out == 8'h 6b&&press_flag==1'b0)
 	begin
 		control<=0;
-        press_flag = 1'b1;
+//        press_flag = 1'b1;
 	end
     // else if(ps2_key_pressed == 1&&ps2_out == 8'h 76&&press_flag==1'b0)
 	// begin
